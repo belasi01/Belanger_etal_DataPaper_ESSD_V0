@@ -13,6 +13,7 @@ library(latex2exp)
 
 con <- file("./data/WISE_MAN_F5_CAST_003_190818_181835_URC.tsv", "r")
 line = readLines(con,1)
+nhead=0
 if (line == "Start of Header") {
   nhead = 1
   while(line != "End of Header") {
@@ -23,6 +24,7 @@ if (line == "Start of Header") {
   print("Header detected")
   print(nhead)
 }
+#close(con)
 
 
 df = read.table(file = "./data/WISE_MAN_F5_CAST_003_190818_181835_URC.tsv",
@@ -84,7 +86,8 @@ p1 <- ggplot(df, aes(x=Time, y=Depth)) +
 
 
 
-load("./data/WISE_MAN_F5_CAST_003_190818_181835_URC.tsv.RData")
+load("/data/homeData/Insitu/WISEMan/L2/20190818_StationMAN-F05/COPS_FJSaucier/BIN/WISE_MAN_F5_CAST_003_190818_181835_URC.tsv.RData")
+cast3 <- cops
 # extract EdZ data
 EdZ<-cops$EdZ[,c(7, 12, 14)]  # Keep 443, 560 and 625 nm to plot
 df <- as.data.frame(cbind(cops$Depth-0.05, EdZ))
@@ -117,7 +120,8 @@ p2 <- ggplot() +
     legend.position = c(.3, .95),
     legend.justification = c("right", "top"),
     legend.box.just = "right",
-    legend.margin = margin(6, 6, 6, 6)
+    legend.margin = margin(6, 6, 6, 6),
+    legend.background = element_blank()
   )
 
 
@@ -201,14 +205,30 @@ p3 <- ggplot() +
 ### This figure should be done using the final database of Rb that will 
 ### be published in the data paper. The mean and sd of the measured Rb 
 ### at station MAN-F05 must be used.  
+load("/data/homeData/Insitu/WISEMan/L2/20190818_StationMAN-F05/COPS_FJSaucier/BIN/WISE_MAN_F5_CAST_001_190818_181648_URC.tsv.RData")
+cast1 <- cops
+load("/data/homeData/Insitu/WISEMan/L2/20190818_StationMAN-F05/COPS_FJSaucier/BIN/WISE_MAN_F5_CAST_002_190818_181748_URC.tsv.RData")
+cast2 <- cops
 
-Rb<-cops$Rb.LuZ
+
+Rb1<-cast1$Rb.LuZ
+Rb2<-cast2$Rb.LuZ
+Rb3<-cast3$Rb.LuZ
+
+Rbm <- cbind(Rb1,Rb2,Rb3)
+Rb  <- apply(Rbm, 1, mean)
+Rb.sd<-apply(Rbm, 1, sd)
+
+
 Rb<-Rb[Rb<1 & !is.na(Rb)]
+Rb.sd<-Rb.sd[!is.na(Rb.sd)]
+
 waves <-as.numeric(names(Rb))
-df<-data.frame(waves, Rb)
+df<-data.frame(waves, Rb, Rb.sd)
 p4 <- ggplot() +
   geom_point(data=df, aes(x=waves, y=Rb),size=1.5) +
   geom_line(data=df, aes(x=waves, y=Rb),size=0.8)+
+  geom_errorbar(aes(x=waves,ymin=Rb-Rb.sd, ymax=Rb+Rb.sd), width=.2, position=position_dodge(.9))+
   theme_bw() +
   ylab(TeX("$R_b"))+
   xlab(TeX("$\\lambda$"))
@@ -218,5 +238,5 @@ p4 <- ggplot() +
 
 ggarrange(p1,p2,p3,p4,labels=c("(a)", "(b)", "(c)", "(d)"), 
           ncol = 2, nrow=2, widths = 1, heights = 2)
-ggsave("./Figures/Fig_Rb.png", width = 20, height = 15, units = "cm")
+ggsave("./Figures/Fig_Rb_v2.png", width = 20, height = 15, units = "cm")
 
