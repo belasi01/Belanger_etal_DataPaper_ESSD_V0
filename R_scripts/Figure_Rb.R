@@ -66,7 +66,7 @@ p1 <- ggplot(df, aes(x=Time, y=Depth)) +
     ),
     curvature = 0.2,
     size = 1,
-    arrow = arrow(length = unit(0.2, "inch"))
+    arrow = arrow(length = unit(0.15, "inch"))
   ) +
   annotate("text", y= 0.5, x = df$Time[220], label="C-OPS at surface") +
   geom_curve(
@@ -79,7 +79,7 @@ p1 <- ggplot(df, aes(x=Time, y=Depth)) +
     ),
     curvature = -0.1,
     size = 1,
-    arrow = arrow(length = unit(0.2, "inch"))
+    arrow = arrow(length = unit(0.15, "inch"))
   )
 
 
@@ -105,14 +105,14 @@ rbZ = data.frame(x=c(0,200), y=c(rb.z,rb.z))
 p2 <- ggplot() +
   geom_point(data=dfm, aes(x=EdZ, y=Depth, color=Wavelength),size=0.3, shape = 21) +
   geom_path(data=dfm2, aes(x=EdZ, y=Depth, color=Wavelength), size=1) +
-  geom_line(data=bot, aes(x=x, y=y), size=0.8) +
-  geom_line(data=rbZ, aes(x=x, y=y), size=0.8, color="grey", linetype = 2) +
+  geom_line(data=bot, aes(x=x, y=y), size=0.8, color = '#ae8f60') +
+  geom_line(data=rbZ, aes(x=x, y=y), size=0.6, linetype = 2) +
   scale_x_log10() +
   scale_y_reverse() +
   theme_bw() +
   ylab("Depth (m)")+
   xlab(TeX("$E_d(z,\\lambda)\\,\\mu\\,W\\,cm^{-2}\\,nm^{-1}$"))+
-  scale_color_manual(values = c("443" = "blue", "560" = "darkgreen", "625" = "red"))+
+  scale_color_manual(values = c("443" = '#001bff', "560" = '#c3ff00', "625" = '#ff6300'))+
   theme(
     legend.position = c(.3, .95),
     legend.justification = c("right", "top"),
@@ -145,7 +145,7 @@ rbZ = data.frame(x=c(0,1), y=c(rb.z,rb.z))
 arrow3 <- tibble(
   x = 0.07,
   xend = 0.08,
-  y = 4,
+  y = 4.5,
   yend = 5.2
 )
 
@@ -159,17 +159,18 @@ arrow4 <- tibble(
 p3 <- ggplot() +
   geom_point(data=dfm, aes(x=LuZ, y=Depth, color=Wavelength),size=0.3, shape = 21) +
   geom_path(data=dfm2, aes(x=LuZ, y=Depth, color=Wavelength), size=1) + 
-  geom_line(data=bot, aes(x=x, y=y), size=0.8) +
-  geom_line(data=rbZ, aes(x=x, y=y), size=0.8, color="grey", linetype = 2) +
+  geom_line(data=bot, aes(x=x, y=y), size=0.8, color = '#ae8f60') +
+  geom_line(data=rbZ, aes(x=x, y=y), size=0.6, linetype = 2) +
   scale_x_log10() +
   scale_y_reverse() +
   theme_bw() +
   ylab("Depth (m)")+
   xlab(TeX("$L_u(z,\\lambda)\\,\\mu\\,W\\,cm^{-2}\\,nm^{-1}\\,sr^{-1}$"))+
-  scale_color_manual(values = c("443" = "blue", "560" = "darkgreen", "625" = "red"))+
+  scale_color_manual(values = c("443" = '#001bff', "560" = '#c3ff00', "625" = '#ff6300'))+
   theme(legend.position = "none") +
-  annotate("text", y= 4.2, x = 0.4, label="Bottom\ndepth") +
-  annotate("text", y= 3.8, x = 0.07, label="Depth for Rb") +
+  annotate("text", y= 4.2, x = 0.4, label="Bottom\ndepth", color = '#ae8f60') +
+  annotate("text", y= 3.8, x = 0.07, label="Depth for") +
+  annotate("text", y= 4.2 , x = 0.07, label=TeX("$R_b$")) +
   geom_curve(
     data = arrow3,
     aes(
@@ -180,8 +181,7 @@ p3 <- ggplot() +
     ),
     curvature = -0.05,
     size = 1,
-    color = "grey",
-    arrow = arrow(length = unit(0.15, "inch"))) +
+    arrow = arrow(length = unit(0.1, "inch"))) +
   geom_curve(
     data = arrow4,
     aes(
@@ -192,16 +192,31 @@ p3 <- ggplot() +
     ),
     curvature = 0.05,
     size = 1,
-    arrow = arrow(length = unit(0.15, "inch"))
+    color = '#ae8f60',
+    arrow = arrow(length = unit(0.1, "inch"))
   )
 
 
 ##### Plot of spectral Rb
+### This figure should be done using the final database of Rb that will 
+### be published in the data paper. The mean and sd of the measured Rb 
+### at station MAN-F05 must be used.  
 
+Rb<-cops$Rb.LuZ
+Rb<-Rb[Rb<1 & !is.na(Rb)]
+waves <-as.numeric(names(Rb))
+df<-data.frame(waves, Rb)
+p4 <- ggplot() +
+  geom_point(data=df, aes(x=waves, y=Rb),size=1.5) +
+  geom_line(data=df, aes(x=waves, y=Rb),size=0.8)+
+  theme_bw() +
+  ylab(TeX("$R_b"))+
+  xlab(TeX("$\\lambda$"))
+  
 
+  
 
-
-
-ggarrange(p1,p2,p3,labels=c("(a)", "(b)", "(c)"), ncol = 2, nrow=2, widths = 1, heights = 2)
+ggarrange(p1,p2,p3,p4,labels=c("(a)", "(b)", "(c)", "(d)"), 
+          ncol = 2, nrow=2, widths = 1, heights = 2)
 ggsave("./Figures/Fig_Rb.png", width = 20, height = 15, units = "cm")
 
