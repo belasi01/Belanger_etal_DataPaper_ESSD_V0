@@ -329,15 +329,19 @@ Figure~\ref{fig:Rb}d show the resulting $R_b(\lambda)$ of the MAN-F05 station (a
 In 2019, we adapted a Satlantic HyperSAS system to measure in-water hyperspectral $R_{rs}(\lambda)$ from small boats with the capacity to navigate in very shallow waters. 18 stations were visited on June 4$^{th}$ and 5$^{th}$ 2019 in the BSI as part of CHONe-2 project. The Satlantic HyperOCR (HOCR) spectral range spans from 380 to 800~nm at 3~nm resolution. The radiometers were calibrated just before the deployment by the manufacturer. In-water upwelling radiance below the sea surface was measured using two HOCRs held away from the boat with a pole and submerged at two different depths. The surface sensor was lowered at $\sim$5 to 15~cm depth ($z_1$), while the second sensor was $\sim$30~cm deeper (i.e., 40 to 55~cm depth, $z_2$). This set up, while avoiding the surface sky glint correction, allow the calculation of the attenuation coefficient of the up-welling radiance, $K_{L_u}(\lambda)$,  which is needed to extrapolate $L_u(z,\lambda)$ to  $L_u(0-,\lambda)$: 
 
 \begin{equation}
-    K_{L_u}(\lambda) = \frac{L_u(z_1,\lambda) - L_u(z_2,\lambda)}{z_2-z_1}
+    K_{L_u}(\lambda) = \frac{\ln(L_u(z_1,\lambda)) - \ln ( L_u(z_2,\lambda))}{z_2-z_1}
 \end{equation}
 and
 \begin{equation}
-    L_u(0^-,\lambda) = \frac{L_u(z_1,\lambda)}{K_{L_u}(\lambda)}.
+    L_u(0^-,\lambda) = \frac{L_u(z_1,\lambda)}{e^{z_1 \cdot K_{L_u}(\lambda)}}.
 \end{equation}
 $R_{rs}(\lambda)$ is then calculated using eq.~\ref{eq:L_w} and eq.~\ref{eq:Rrs}. \\
 
-Note that $K_{L_u}(\lambda)$ is not constant with depth and is spectrally dependent. In optically shallow waters, $K_{L_u}(\lambda)$ may be negative when light increas approaching the bottom (Figure~\ref{fig:Rb}c). Simultaneously, incident $E_d(0^+)$ was measured above water using a radiometer attached to the side of boat above the structure to avoid shadow. HOCR data were processed using the open-source R-package HyperocR available on the GitHub platform (\url{https://github.com/belasi01/HyperOCR}). Note that the instrument self-shadow correction was considered negligible for HOCR due to the small radius of the instrument (3~cm).\\  
+Note that $K_{L_u}(\lambda)$ is not constant with depth and is spectrally dependent. In optically shallow waters, $K_{L_u}(\lambda)$ may be negative when light increas approaching the bottom (Figure~\ref{fig:Rb}c). Simultaneously, incident $E_d(0^+)$ was measured above water using a radiometer attached to the side of boat above the structure to avoid shadow. HOCR data were processed using the open-source R-package HyperocR available on the GitHub platform (\url{https://github.com/belasi01/HyperOCR}). Note that the instrument self-shadow correction was considered negligible for HOCR due to the small radius of the instrument (3~cm). A comparison of the two in-water methods for $R_{rs}(\lambda)$ is presented in section~\ref{sec:Results}\\  
+
+
+
+
 
 \subsubsection{Above-water radiometry}
 In support of airborne hyperspectral data acquisition, we performed above-water radiometric measurements in 2017 and 2019. Two spectroradiometers were used: an analytical spectral device FieldSpec HandHeld 2 (ASD) and a spectral evolution PSR-1100f (PSR). Both instruments had a spectral resolution of $\sim$3~nm covering a spectral range from 325/320 to 1075/1100 nm (ASD/PSR) and were fitted with a bare fiber optic with a 25\degree field of view (FOV). Calibrated spectralon panels were used as reference to compute the remote sensing reflectance following \citet{Mobley1999}: 
@@ -347,19 +351,19 @@ In support of airborne hyperspectral data acquisition, we performed above-water 
     R_{rs}(\lambda) = (L_t(\lambda) - \rho_{sky}L_{sky}(\lambda)) / \left( \frac{\pi}{R_p(\lambda)}\times L_p(\lambda) \right) - \Delta
 \end{equation}
 
-where $L_t(\lambda)$ is the total upwelling radiance from the water as measured by the instrument; $\rho_{sky}$ is the skylight reflectance that depends upon the sun-viewing geometry, sea state (i.e., wind speed) and instrument FOV; $L_{sky}(\lambda)$ is the sky radiance coming from the direction of specularly reflected sky light; $L_p(\lambda)$ and $R_p(\lambda)$ are the up-welling radiance and reflectance of the spectralon panel, respectively; and $\Delta$ a residual . In general, a sequence of $L_t(\lambda)$, $L_{sky}(\lambda)$  and $L_t(\lambda)$ was made on a station and last for about 5 minutes. The instrument integration time and dark current subtraction were systematically apply for each radiance measurements. The sensor viewing zenith angle ($\theta_v$) of $\sim$40\degree and an azimuth difference between the solar and sensor ($\Delta\phi$) planes between 90 and 135\degree was chosen to minimize the sun glint contamination \citep{Mobley1999}. The windspeed and sun-view geometry was recorded systematically to perform the sky glint correction.   \\
+where $L_t(\lambda)$ is the total upwelling radiance from the water as measured by the instrument; $\rho_{sky}$ is the skylight reflectance that depends upon the sun-viewing geometry, sea state (i.e., wind speed) and instrument FOV; $L_{sky}(\lambda)$ is the sky radiance coming from the direction of specularly reflected sky light; $L_p(\lambda)$ and $R_p(\lambda)$ are the up-welling radiance and reflectance of the spectralon panel, respectively; and $\Delta$ a residual . In general, a sequence of $L_t(\lambda)$, $L_{sky}(\lambda)$  and $L_t(\lambda)$ was made on a station and last for about 5 minutes. The instrument integration time and dark current subtraction were systematically apply for each radiance measurements. The sensor viewing zenith angle ($\theta_v$) of $\sim$40\degree and an azimuth difference between the solar and sensor ($\Delta\phi$) planes between 90 and 135\degree was chosen to minimize the sun glint contamination \citep{Mobley1999}. The wind speed and sun-view geometry were recorded systematically to perform the sky glint correction.   \\
 
 Several methods were implemented and tested to estimate $\rho_{sky}$, including 
 \begin{enumerate}
-    \item Look-up-tables of $\rho_{sky}$ published by  \citet{Mobley1999,Mobley2015} taking as input the $\theta_v$, $\Delta\phi$, the sun zenith angle ($\theta_s$) and the wind speed (hereafter the LUT method);
-    \item LUT method with a white correction using the residual values of $R_{rs}$ in the near infrared (890-900 nm) (assuming black waters in this spectral range); 
+    \item Look-up-tables of $\rho_{sky}$ published by  \citet{Mobley1999,Mobley2015} taking as input the $\theta_v$, $\Delta\phi$, the sun zenith angle ($\theta_s$) and the wind speed (hereafter the LUT method). This method is applied with or without a white correction assuming NULL $R_{rs}$ in the near infrared (890-900 nm) (assuming black waters in this spectral range); 
     \item LUT method with white correction assuming the similarity spectrum in NIR of \citet{Ruddick2006} using two NIR bands at 720 and 780 nm respectively (ideal for moderately turbid waters); 
     \item LUT method with white correction assuming the similarity spectrum in NIR of \citet{Ruddick2006} using two NIR bands at 780 and 870 nm respectively (ideal for very turbid waters); 
     \item $\rho_{sky}$ estimated assuming $L_w$ is NULL in the NIR (890-900nm), i.e. $\rho_{sky}^{NIR} = \frac{L_t(NIR)}{L_{sky}(NIR)}$;
     \item $\rho_{sky}$ estimated assuming $L_w$ is NULL in the UV domain (350-380nm), i.e. $\rho_{sky}^{UV} = \frac{L_t(UV)}{L_{sky}(UV)}$;
-    \item $\rho_{sky}$ estimated assuming $L_w$ is NULL in both UV and NIR domains with a linear interpolation between them \citet{Kutser2013} method in which $\rho_{sky}^{NIR}$ and $\rho_{sky}^{UV}$ are spectrally dependent $\rho_{sky}$;
-    \item Glint correction assuming $L_w$ is NULL in the both UV and NIR domains, which subtract the values of the obtained power function from the measured uncorrected reflectance ($\frac{L_t}{L_p}$), as detailed in ; 
-    \item the method of \citet{Jiang2020}, which combines the LUT method and a residual white correction based on the relative height of the water absorption band trough (or reflectance peak) centered at 810 nm.  
+    \item $\rho_{sky}$ estimated assuming $L_w$ is NULL in both UV and NIR domains with a linear interpolation between them; 
+    \item Glint correction assuming NULL $L_w$ in the both UV (350-380) and NIR (890-900) domains, which subtract the values of the obtained power function from the measured uncorrected reflectance ($\frac{L_t}{L_p}$), as detailed in \citet{Kutser2013RemovingWaters}; 
+    \item the method of \citet{Jiang2020AMeasurements}, which combines the LUT method and a residual white correction based on the relative height of the water absorption band trough (or reflectance peak) centered at 810 nm;
+    \item finally, when C-OPS-derived $R_{rs}$ is available, we forces hyperspectral $R_{rs}$ to match C-OPS $R_{rs}$ at two wavelengths (i.e., $\sim$400nm and $\sim$700nm, respectively). 
 \end{enumerate} 
 
 
@@ -518,7 +522,18 @@ To complete the method section we need to decide what diving data we present. To
 Add this section here? Example of text taken from Massicote MALINA data paper: "Different quality control procedures were adopted to ensure the integrity of the data. First, the raw data were visually screened to eliminate errors originating from the measurement devices, including sensors (systematic or random) and errors inherent from measurement procedures and methods. Statistical summaries such as average, standard deviation and range were computed to detect and remove anomalous values in the data. Then, data were checked for duplicates and remaining outliers. The complete list of variables is presented in Table xx."
 
 \section{Results}
+\label{sec:Results}
 Examples of plots to show the results. Note that there seem to have outliers here and there...
+
+A comparison of the two in-water methods for $R_{rs}(\lambda)$ were performed at one station (PT-01) in the center of the BSI on June 4th 2019 (Fig.~\ref{fig:PT01}). Overcast conditions in the morning  were prevalent during the measurements. The station was influenced by a turbid plume with a reddish color, resulting in a $R_{rs}$ peak at about 690 nm. Strong absorption at short wavelengths and low solar irradiance resulted in low and noisier $R_{rs}$ below 450 nm. In those conditions, we observed larger uncertainty in C-OPS-derived $R_{rs}$ (error bar are from three C-OPS profiles) compared to HOCR, but the overall magnitude and spectral shape were in good agreement. A more complete method comparison is out of the scope of this study, but more work is needed to assess the accuracy of the HOCR method relative to C-OPS. 
+
+\begin{figure}
+    \centering
+    \includegraphics{Figures/Rrs_HOCR-COPS-PT01-June4th2019.png}
+    \caption{Comparison of $R_{rs}(\lambda)$ determined with C-OPS and HOCR performed at station PT-01 in the BSI on June 4th 2019. Error bars are the standard deviation computed from three C-OPS casts and two HOCR replicates. }
+    \label{fig:PT01}
+\end{figure}
+
 
 
 \begin{figure}[t]
